@@ -121,7 +121,6 @@ class NNSolver(Solver):
             if isinstance(m, nn.Linear):
                 nn.init.orthogonal_(m.weight.data)
                 m.bias.data.uniform_(-0.01, 0.01)
-        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-3)
         self.set_params(**g)
 
         valid_size = int(len(y) * val_ratio)

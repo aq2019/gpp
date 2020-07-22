@@ -9,7 +9,7 @@ from statsmodels.tsa.stattools import adfuller
 
 from dataset import PriceDataset
 
-path = "./data/"
+path = "./datacopy/"
 gold_symbol = "^xauusd"
 symbol_lst_vol = ["^btcusd", "shv",
                   "tlt"] #gold etf and bond etf "gld", "iei", "shy","ief",

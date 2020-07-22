@@ -43,11 +43,13 @@ class PriceDataset():
         self.transform = StandardScaler()
         self.PCA_transform = PCA(n_components = 1083, whiten=True)
     
-    def save_features(self, fea_path, data_path):
+    def save_features(self, fea_path, data_path, target_path):
         self.data_final.to_csv(data_path, index = False)
         self.features.to_csv(fea_path, index = False)
+        self.target_date_feature.to_csv(target_path, index = False)
 
-    def load_features(self, fea_path, data_path):
+    def load_features(self, fea_path, data_path, target_path):
+        self.target_date_feature = pd.read_csv(target_path)
         self.data_final = pd.read_csv(data_path)
         self.features = pd.read_csv(fea_path)
         self.datasize = len(self.data_final)
@@ -89,7 +91,7 @@ class PriceDataset():
         self.data_final = self.data_final.fillna(method='bfill')
 
         tt = self.data_final.loc[:, ~self.data_final.columns.isin(['Time', 'logreturn'])].copy(deep=True)
-        #tt = ewm_features(tt)
+        #tt = ewm_features(tt)# .clip(-20.0, 20.0)
         tt = pd.DataFrame(self.transform.fit_transform(tt))
         #tt = self.PCA_transform.fit_transform(self.data_final.loc[:, ~self.data_final.columns.isin(['Time', 'logreturn'])])
         #tt = pd.DataFrame(whiten(tt.values))

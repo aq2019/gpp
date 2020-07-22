@@ -8,6 +8,11 @@ from utils import cross_validation, get_eln_param
 from dataset import PriceDataset
 from sklearn.model_selection import ParameterGrid
 
+torch.manual_seed(0)
+torch.backends.cudnn.deterministic = True
+torch.backends.cudnn.benchmark = False
+np.random.seed(0)
+
 path = "./datacopy/"
 gold_symbol = "^xauusd"
 symbol_lst_vol = ["^btcusd", "gld", "shv",
@@ -24,14 +29,14 @@ nn_hparams = { 'weight_decay': [0.5 * u for u in range(5, 15, 2)],
 ridge_hparams = {'alpha': [1e6*u for u in range(1, 20, 1)]}
 
 
-lgbm_hparams = {'boosting_type': ['dart'],
-                'reg_lambda': [6.0, 8.0, 10.0],
+lgbm_hparams = {'boosting_type': ['gbdt', 'dart'],
+                'reg_lambda': [4.0, 6.0, 8.0, 10.0],
                 'objective': ['huber'],
                 'verbose': [-1],
-                'feature_fraction': [0.95], 
+                'feature_fraction': [0.9, 0.95], 
                 #'bagging_fraction': [0.8],
                 #'bagging_freq': [6],
-                'num_leaves': [12, 15],  
+                'num_leaves': [8, 12, 16],  
                 'learning_rate': [0.005, 0.001],
                 'early_stopping_rounds': [30],  
                 'num_boost_round': [150],  
@@ -46,16 +51,16 @@ if __name__ == '__main__':
     for symb in symbol_lst_vol:
         price_data.add_auxdata(symb+'_v', path+symb+".csv")
     price_data.prepare_feature()
-    price_data.save_features('features_final.csv', 'data_final.csv')
-    #price_data.load_features('features_final.csv', 'data_final.csv')
+    #price_data.save_features('features_final_ewma.csv', 'data_final_ewma.csv', 'target_final_ewma.csv')
+    #price_data.load_features('features_final_ewma.csv', 'data_final_ewma.csv', 'target_final_ewma.csv',)
 
     print("========="*4)
     if not np.all(np.isfinite(price_data.features.iloc[:, ~price_data.features.columns.isin(['Time', 'logreturn'])])) \
             or np.any(np.isnan(price_data.features.iloc[:, ~price_data.features.columns.isin(['Time', 'logreturn'])])):
         print("nan or inf in the data!!")
     else:
-        #hparams = lgbm_hparams  
-        hparams = nn_hparams
+        hparams = lgbm_hparams  
+        #hparams = nn_hparams
         #hparams = ridge_hparams
         
         best_r2_res = (-np.inf, np.inf, -np.inf)
@@ -66,8 +71,8 @@ if __name__ == '__main__':
         best_corr_conf = None
         count = 1
         for g in ParameterGrid(hparams):
-            alg = NNSolver(897, 128 ,1) #1023
-            #alg = lgbmSolver() 
+            #alg = NNSolver(897, 64 ,1) #1023
+            alg = lgbmSolver() 
             #alg =  Lasso() # Ridge() # 
 
             print("************"*5)
@@ -103,44 +108,18 @@ if __name__ == '__main__':
 
 
 """ 
-nn
+final
 ===r2=======r2=======r2=======r2=======r2====
-(-0.007029189551073345, 0.00025018748684652926)
-{'lr': 0.001, 'weight_decay': 2.1}
-"""
-""" 
-Ridge
+(-0.005333120651336798, 0.0002342893098355686, 0.1975090919486559)
+{'boosting_type': 'dart', 'early_stopping_rounds': 30, 'feature_fraction': 0.95, 'learning_rate': 0.005, 'num_boost_round': 150, 'num_leaves': 16, 'objective': 'huber', 'reg_lambda': 8.0, 'verbose': -1}
+====mse=======mse=======mse=======mse=======mse===
+(-0.005333120651336798, 0.0002342893098355686, 0.1975090919486559)
+{'boosting_type': 'dart', 'early_stopping_rounds': 30, 'feature_fraction': 0.95, 'learning_rate': 0.005, 'num_boost_round': 150, 'num_leaves': 16, 'objective': 'huber', 'reg_lambda': 8.0, 'verbose': -1}
+final_ewma
 ===r2=======r2=======r2=======r2=======r2====
-(-0.021697069946226534, 0.00023975688257134995)
-{'alpha': 1000000.0}
+(-0.014286672955967994, 0.0002371502478032773, 0.10988593884169126)
+{'boosting_type': 'dart', 'early_stopping_rounds': 30, 'feature_fraction': 0.95, 'learning_rate': 0.005, 'num_boost_round': 150, 'num_leaves': 8, 'objective': 'huber', 'reg_lambda': 10.0, 'verbose': -1}
 ====mse=======mse=======mse=======mse=======mse===
-(-0.021697069946226534, 0.00023975688257134995)
-{'alpha': 1000000.0}
- """
-""" 
- Lasso
-===r2=======r2=======r2=======r2=======r2====
-(-0.023438224777755767, 0.00024011452646721283)
-{'alpha': 19000000.0}
-====mse=======mse=======mse=======mse=======mse===
-(-0.023438224777755767, 0.00024011452646721283)
-{'alpha': 19000000.0}
-
- """
-""" 
- dart
- ===r2=======r2=======r2=======r2=======r2====
-(-0.009444106021066424, 0.00023643359037571642, 0.1321532830330821)
-{'boosting_type': 'dart', 'early_stopping_rounds': 30, 'feature_fraction': 0.95, 'learning_rate': 0.005, 'num_boost_round': 150, 'num_leaves': 15, 'objective': 'huber', 'reg_lambda': 6.0, 'verbose': -1}
-====mse=======mse=======mse=======mse=======mse===
-(-0.010360091136239568, 0.0002362479174612726, 0.14370463872427272)
-{'boosting_type': 'dart', 'early_stopping_rounds': 30, 'feature_fraction': 0.95, 'learning_rate': 0.005, 'num_boost_round': 150, 'num_leaves': 15, 'objective': 'huber', 'reg_lambda': 8.0, 'verbose': -1}
-"""
-""" 
-===r2=======r2=======r2=======r2=======r2====
-(-0.015151075107785017, 0.00023799627940427015, 0.11632750291661624)
-{'boosting_type': 'gbdt', 'early_stopping_rounds': 30, 'feature_fraction': 0.9, 'learning_rate': 0.005, 'num_boost_round': 150, 'num_leaves': 12, 'objective': 'huber', 'reg_lambda': 6.0, 'verbose': -1}
-====mse=======mse=======mse=======mse=======mse===
-(-0.015151075107785017, 0.00023799627940427015, 0.11632750291661624)
-{'boosting_type': 'gbdt', 'early_stopping_rounds': 30, 'feature_fraction': 0.9, 'learning_rate': 0.005, 'num_boost_round': 150, 'num_leaves': 12, 'objective': 'huber', 'reg_lambda': 6.0, 'verbose': -1}
+(-0.014286672955967994, 0.0002371502478032773, 0.10988593884169126)
+{'boosting_type': 'dart', 'early_stopping_rounds': 30, 'feature_fraction': 0.95, 'learning_rate': 0.005, 'num_boost_round': 150, 'num_leaves': 8, 'objective': 'huber', 'reg_lambda': 10.0, 'verbose': -1}
 """
