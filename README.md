@@ -4,6 +4,8 @@ gold price prediction challenge
 ### Summary:
 see summary.ipynb
 
+(interactive plots may not show properly without re-running the notebook)
+
 ### Data source
 
 https://www.barchart.com/futures/quotes/GCQ20/historical-download
