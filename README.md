@@ -1,10 +1,7 @@
 # gpp
-gold price prediction challenge
+The task for this project is to predict the price of gold at market close on July 24, 2020, based on any data available on July 20, 2020. 
 
-### Summary:
-see summary.ipynb
-
-(interactive plots may not show properly without re-running the notebook)
+A overview of the project can be found [here](https://docs.google.com/presentation/d/115wFHpCPVSBdEEnHgdZ9A7dlYd6JTQzNM501eSP5o2Q/edit?usp=sharing).
 
 ### Data source
 
@@ -12,7 +9,6 @@ https://www.barchart.com/futures/quotes/GCQ20/historical-download
 
 ### Data description
 
-All datasets include columns: Open, High, Low, Last, Change, Volume
 
 - ^xauusd.csv
     - Gold

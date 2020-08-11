@@ -50,18 +50,18 @@ if __name__ == '__main__':
         price_data.add_auxdata(symb, path+symb+".csv")
     for symb in symbol_lst_vol:
         price_data.add_auxdata(symb+'_v', path+symb+".csv")
-    price_data.prepare_feature()
+    #price_data.prepare_feature()
     #price_data.save_features('features_final_ewma.csv', 'data_final_ewma.csv', 'target_final_ewma.csv')
-    #price_data.load_features('features_final_ewma.csv', 'data_final_ewma.csv', 'target_final_ewma.csv',)
+    price_data.load_features('features_final_ewma.csv', 'data_final_ewma.csv', 'target_final_ewma.csv',)
 
     print("========="*4)
     if not np.all(np.isfinite(price_data.features.iloc[:, ~price_data.features.columns.isin(['Time', 'logreturn'])])) \
             or np.any(np.isnan(price_data.features.iloc[:, ~price_data.features.columns.isin(['Time', 'logreturn'])])):
         print("nan or inf in the data!!")
     else:
-        hparams = lgbm_hparams  
+        #hparams = lgbm_hparams  
         #hparams = nn_hparams
-        #hparams = ridge_hparams
+        hparams = ridge_hparams
         
         best_r2_res = (-np.inf, np.inf, -np.inf)
         best_r2_conf = None
@@ -72,8 +72,8 @@ if __name__ == '__main__':
         count = 1
         for g in ParameterGrid(hparams):
             #alg = NNSolver(897, 64 ,1) #1023
-            alg = lgbmSolver() 
-            #alg =  Lasso() # Ridge() # 
+            #alg = lgbmSolver() 
+            alg =  Ridge() # Lasso() 
 
             print("************"*5)
             print(count)
