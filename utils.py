@@ -13,7 +13,7 @@ def cross_validation(num_fold, alg, dataset, **g):
         x_train = tr.drop(['logreturn', 'Time'], axis=1)
         y_test = valid['logreturn']
         x_test = valid.drop(['logreturn', 'Time'], axis=1)
-        alg.fit(x_train, y_train) # **g
+        alg.fit(x_train, y_train, **g) # **g
         #alg.save_model('./results/lgbm_'+str(idx)+'.lgbm')
         ypred = alg.predict(x_test)
         res_r2[idx] = r2_score(y_test, ypred)
