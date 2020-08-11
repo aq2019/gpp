@@ -1,4 +1,4 @@
-# gpp
+
 The task for this project is to predict the price of gold at market close on July 24, 2020, based on any data available on July 20, 2020. 
 
 A overview of the approach can be found [here](https://docs.google.com/presentation/d/115wFHpCPVSBdEEnHgdZ9A7dlYd6JTQzNM501eSP5o2Q/edit?usp=sharing).
